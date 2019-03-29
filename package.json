@@ -9,13 +9,17 @@
   "dependencies": {
     "expo": "^32.0.0",
     "react": "16.5.0",
-    "react-native": "https://github.com/expo/react-native/archive/sdk-32.0.0.tar.gz"
+    "react-native": "https://github.com/expo/react-native/archive/sdk-32.0.0.tar.gz",
+    "react-native-elements": "0.18.5",
+    "react-native-svg-charts": "^5.0.1"
   },
   "devDependencies": {
     "@types/expo": "^32.0.1",
     "@types/react": "^16.8.2",
     "@types/react-native": "^0.57.35",
+    "@types/react-native-svg-charts": "^5.0.1",
     "babel-preset-expo": "^5.0.0",
+    "prettier": "^1.16.4",
     "react-native-typescript-transformer": "^1.2.11",
     "tslib": "^1.9.3",
     "tslint": "^5.12.1",
