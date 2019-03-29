@@ -1,5 +1,5 @@
 import * as React from "react";
-import { View, Button, FlatList } from "react-native";
+import { View, Button, FlatList, ActivityIndicator } from "react-native";
 import { NavigationScreenProps } from "react-navigation";
 import { ListItem, SearchBar } from "react-native-elements";
 
@@ -10,6 +10,7 @@ interface MuniTableRow {
 interface SearchState {
     searchString: string;
     muniList: MuniTableRow[];
+    loading: boolean;
 }
 export class Search extends React.Component<NavigationScreenProps, SearchState> {
     static navigationOptions = {
@@ -17,7 +18,8 @@ export class Search extends React.Component<NavigationScreenProps, SearchState> 
     };
     state: SearchState = {
         searchString: "",
-        muniList: []
+        muniList: [],
+        loading: true
     };
 
     componentWillMount() {
@@ -30,6 +32,7 @@ export class Search extends React.Component<NavigationScreenProps, SearchState> 
         );
         const data = await response.json();
         this.setState({
+            loading: false,
             muniList:
                 data && data.query_result && data.query_result.data && data.query_result.data.rows
                     ? (data.query_result.data.rows as MuniTableRow[]).sort((a, b) =>
@@ -61,7 +64,7 @@ export class Search extends React.Component<NavigationScreenProps, SearchState> 
                         name_municipality.match(this.state.searchString))}
                     keyExtractor={(_, i) => i.toString()}
                     renderItem={({ item }) =>
-                        <ListItem
+                        this.state.loading ? <ActivityIndicator size="large" color="#0000dd" /> : <ListItem
                             title={`${item.name_municipality}`}
                             onPress={() => this.props.navigation.navigate("ViewSingleCity",
                                 {
@@ -73,7 +76,6 @@ export class Search extends React.Component<NavigationScreenProps, SearchState> 
                     ListHeaderComponent={this.renderHeader}
                     stickyHeaderIndices={[0]}
                 />
-
                 <Button
                     title="Go to Demo for graphical capabilities"
                     onPress={() => this.props.navigation.navigate("Demo")}
