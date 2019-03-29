@@ -64,18 +64,21 @@ export default class App extends React.Component {
     const Labels = ({ x, y, bandwidth, data }: BarChartChildProps<DataPoint>) => (
       (!x || !y || !bandwidth || !data) ?
         null :
-        data.map(({ dob }, index) => (
-          <Svg.Text
-            key={index}
-            x={x(index) + (bandwidth / 2)}
-            y={dob.age < CUT_OFF ? y(dob.age) - 10 : y(dob.age) + 15}
-            fontSize={14}
-            fill={dob.age >= CUT_OFF ? "white" : "black"}
-            textAnchor={"middle"}
-          >
-            {dob.age}
-          </Svg.Text>
-        ))
+        <React.Fragment>
+          {
+            data.map(({ dob }, index) => (
+              <Svg.Text
+                key={index}
+                x={x(index) + (bandwidth / 2)}
+                y={dob.age < CUT_OFF ? y(dob.age) - 10 : y(dob.age) + 15}
+                fontSize={14}
+                fill={dob.age >= CUT_OFF ? "white" : "black"}
+                textAnchor={"middle"}
+              >
+                {dob.age}
+              </Svg.Text>
+            ))
+          }</React.Fragment>
     );
 
     return (
@@ -88,9 +91,10 @@ export default class App extends React.Component {
             svg={{ fill: "rgba(134, 65, 244, 0.8)" }}
             contentInset={{ top: 10, bottom: 10 }}
             gridMin={0}
-            children={[<Grid direction={Grid.Direction.HORIZONTAL} />,
-            (<Labels /> as unknown) as Element]}
-          /> : null}
+          >
+            <Grid direction={Grid.Direction.HORIZONTAL} />
+            <Labels />
+          </BarChart> : null}
         </View>
         <View style={styles.flatList}>
           <FlatList
