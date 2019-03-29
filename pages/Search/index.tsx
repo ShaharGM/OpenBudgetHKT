@@ -1,32 +1,79 @@
 import * as React from "react";
-import { Text, View, Button, TextInput } from "react-native";
+import { View, Button, FlatList } from "react-native";
 import { NavigationScreenProps } from "react-navigation";
+import { ListItem, SearchBar } from "react-native-elements";
 
-export class Search extends React.Component<NavigationScreenProps> {
+interface MuniTableRow {
+    entity_id: string;
+    name_municipality: string;
+}
+interface SearchState {
+    searchString: string;
+    muniList: MuniTableRow[];
+}
+export class Search extends React.Component<NavigationScreenProps, SearchState> {
     static navigationOptions = {
         title: "Search cities",
     };
-    state = {
-        id: "",
-        searchString: ""
+    state: SearchState = {
+        searchString: "",
+        muniList: []
     };
+
+    componentWillMount() {
+        this.fetchData();
+    }
+
+    fetchData = async () => {
+        const response = await fetch(
+            "https://app.redash.io/hasadna/api/queries/185508/results.json?api_key=FVLJzO1Au4ZM1yhr0J0jDKCg97wE0i12T9UGK9GY"
+        );
+        const data = await response.json();
+        this.setState({
+            muniList:
+                data && data.query_result && data.query_result.data && data.query_result.data.rows
+                    ? (data.query_result.data.rows as MuniTableRow[]).sort((a, b) =>
+                        a.name_municipality < b.name_municipality ? -1 :
+                            a.name_municipality > b.name_municipality ? 1 :
+                                0) : []
+        });
+    }
+
+    renderHeader = () => {
+        return (
+            <SearchBar
+                placeholder="Type Here..."
+                lightTheme
+                round
+                onChangeText={(searchString) => this.setState({ searchString })}
+                autoCorrect={false}
+                value={this.state.searchString}
+            />
+        );
+    }
 
     render() {
         return (
             <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-                <Text>Search Screen</Text>
-                <TextInput
-                    style={{ width: "80%", height: 30, borderColor: "gray", borderWidth: 1 }}
-                    onChangeText={(searchString) => this.setState({ searchString })}
-                    value={this.state.searchString}
+                <FlatList
+                    style={{ width: "100%" }}
+                    data={this.state.muniList.filter(({ name_municipality }) =>
+                        name_municipality.match(this.state.searchString))}
+                    keyExtractor={(_, i) => i.toString()}
+                    renderItem={({ item }) =>
+                        <ListItem
+                            title={`${item.name_municipality}`}
+                            onPress={() => this.props.navigation.navigate("ViewSingleCity",
+                                {
+                                    cityName: item.name_municipality,
+                                    cityId: item.entity_id
+                                })}
+                        />
+                    }
+                    ListHeaderComponent={this.renderHeader}
+                    stickyHeaderIndices={[0]}
                 />
 
-                <Button
-                    title={`Go to City with ID ${this.state.searchString}`}
-                    onPress={() => this.props.navigation.navigate("ViewSingleCity",
-                        { cityName: this.state.searchString, cityId: this.state.searchString })}
-                    disabled={!this.state.searchString}
-                />
                 <Button
                     title="Go to Demo for graphical capabilities"
                     onPress={() => this.props.navigation.navigate("Demo")}
