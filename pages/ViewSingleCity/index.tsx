@@ -1,8 +1,18 @@
 import * as React from "react";
 import { Text, View, Button } from "react-native";
-import { NavigationScreenProps } from "react-navigation";
+import { NavigationScreenProps, NavigationScreenConfig, NavigationStackScreenOptions } from "react-navigation";
 
+export interface ViewSingleCityNavParams {
+    cityId: string;
+    cityName: string;
+}
 export class ViewSingleCity extends React.Component<NavigationScreenProps> {
+    static navigationOptions: NavigationScreenConfig<NavigationStackScreenOptions> = ({ navigation }) => {
+        return {
+            title: navigation.getParam("cityName", ""),
+        };
+    }
+
     render() {
         const { navigation } = this.props;
         const cityId = navigation.getParam("cityId", "None");

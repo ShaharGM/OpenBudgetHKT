@@ -3,6 +3,9 @@ import { Text, View, Button, TextInput } from "react-native";
 import { NavigationScreenProps } from "react-navigation";
 
 export class Search extends React.Component<NavigationScreenProps> {
+    static navigationOptions = {
+        title: "Search cities",
+    };
     state = {
         id: "",
         searchString: ""
@@ -14,14 +17,15 @@ export class Search extends React.Component<NavigationScreenProps> {
                 <Text>Search Screen</Text>
                 <TextInput
                     style={{ width: "80%", height: 30, borderColor: "gray", borderWidth: 1 }}
-                    onChangeText={(id) => this.setState({ id })}
-                    value={this.state.id}
+                    onChangeText={(searchString) => this.setState({ searchString })}
+                    value={this.state.searchString}
                 />
 
                 <Button
-                    title={`Go to City with ID ${this.state.id}`}
-                    onPress={() => this.props.navigation.navigate("ViewSingleCity", { cityId: this.state.id })}
-                    disabled={!this.state.id}
+                    title={`Go to City with ID ${this.state.searchString}`}
+                    onPress={() => this.props.navigation.navigate("ViewSingleCity",
+                        { cityName: this.state.searchString, cityId: this.state.searchString })}
+                    disabled={!this.state.searchString}
                 />
                 <Button
                     title="Go to Demo for graphical capabilities"
