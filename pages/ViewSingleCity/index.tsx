@@ -85,19 +85,6 @@ export class ViewSingleCity extends React.Component<NavigationScreenProps> {
     render() {
         return (
             <View style={styles.container}>
-                {/* <Overlay
-                    isVisible={!this.state.comparisonVector}
-                    windowBackgroundColor="rgba(255, 255, 255, .8)"
-                    width="auto"
-                    height="auto"
-                >
-                    <View>
-                        <Button title="השוואה לפי מדד סוציואקונומי"
-                            onPress={() => this.setState({ comparisonVector: "socialScore" })} />
-                        <Button title="השוואה לפי גודל אוכלוסיה"
-                            onPress={() => this.setState({ comparisonVector: "populationSize" })} />
-                    </View>
-                </Overlay> */}
                 {!this.state.comparisonVector ? <ActivityIndicator size="large" color="#0000dd" /> :
                     <Comparator
                         muniName={this.props.navigation.getParam("cityName", "")}

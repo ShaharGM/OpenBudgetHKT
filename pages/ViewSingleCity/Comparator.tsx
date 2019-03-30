@@ -3,7 +3,7 @@ import * as React from "react";
 import { Text, Slider, Button } from "react-native-elements";
 import { getRedashQueryData } from "../../helpers/getRedashQueryData";
 import { muniDataKeys, muniKeyToName, muniData } from "../../helpers/muniDetails";
-import { Svg } from "expo";
+// import { Svg } from "expo";
 // import { BarChart, Grid } from "react-native-svg-charts";
 import { BarChartChildProps } from "../Demo";
 import { StyleSheet, View, ActivityIndicator } from "react-native";
@@ -157,15 +157,16 @@ export class Comparator extends React.Component<ComparatorProps, ComparatorState
                 ? <ActivityIndicator size="large" color="#0000dd" />
                 : <React.Fragment>
                     <View style={styles.comparator}>
-                        {resData
-                            .sort((a, b) =>
+                        {(resData as ComparatorData[])
+                            .sort((a: any, b: any) =>
                                 a[this.props.muniColumn] < b[this.props.muniColumn] ?
                                     -1 :
                                     a[this.props.muniColumn] > b[this.props.muniColumn] ?
                                         1 : 0
                             )
-                            .map(({ entity_id, name_municipality }) =>
+                            .map(({ entity_id, name_municipality, [this.props.muniColumn]: otherValue }) =>
                                 (<Button
+                                    buttonStyle={{ height: 100 * Math.abs(Number(otherValue) / this.state.baseValue) }}
                                     key={entity_id}
                                     title={name_municipality}
                                     onPress={() => this.props.navigation.navigate("Compare", {
