@@ -2,7 +2,7 @@ import * as React from "react";
 import { Text, View, ActivityIndicator } from "react-native";
 import { PieChart,BarChart, Grid, StackedBarChart } from 'react-native-svg-charts'
 import { getRedashQueryData } from "../../helpers/getRedashQueryData";
-import { NavigationScreenProps, NavigationScreenConfig, NavigationStackScreenOptions } from "react-navigation";
+import { NavigationScreenProps, NavigationScreenConfig, NavigationStackScreenOptions, ScrollView } from "react-navigation";
 
 export class Compare extends React.Component<NavigationScreenProps> {
     static navigationOptions: NavigationScreenConfig<NavigationStackScreenOptions> = ({ navigation }) => {
@@ -88,7 +88,27 @@ export class Compare extends React.Component<NavigationScreenProps> {
             const colors =['blue', 'red']
             const keys = [1,2]
             
-            const pieData = dataPop
+            const pieData1 = dataPop
+                .filter(value => value > 0)
+                .map((value, index) => ({
+                    value,
+                    svg: {
+                        fill: colors[index],
+                        onPress: () => console.log('press', index),
+                    },
+                    key: `pie-${index}`,
+                }))
+                const pieData2 = dataSocio
+                .filter(value => value > 0)
+                .map((value, index) => ({
+                    value,
+                    svg: {
+                        fill: colors[index],
+                        onPress: () => console.log('press', index),
+                    },
+                    key: `pie-${index}`,
+                }))
+                const pieData3 = dataBudget
                 .filter(value => value > 0)
                 .map((value, index) => ({
                     value,
@@ -100,6 +120,7 @@ export class Compare extends React.Component<NavigationScreenProps> {
                 }))
 
             return (
+                <ScrollView>
                 <React.Fragment>
                     <View>
                        <Text style = {{fontWeight: 'bold', textAlign: 'center', fontSize: 24, padding: 20}}>
@@ -109,33 +130,30 @@ export class Compare extends React.Component<NavigationScreenProps> {
                     <View>
                         <PieChart
                             style={ { height: 200 } }
-                            data={ pieData }
+                            data={ pieData1 }
                         />
+                        <Text>{(this.state.muniDataBase['name_municipality'])} Population: {JSON.stringify(dataPop[0])} thousands</Text>
+                        <Text>{(this.state.muniDataCompare['name_municipality'])} Population: {JSON.stringify(dataPop[1])} thousands</Text>
                     </View>
                     <View>
-                        <BarChart
-                            style={{ height: 200 }}
-                            data={ dataSocio }
-                            svg={{ fill }}
-                            contentInset={{ top: 30, bottom: 30 }}
-                        >
-                        <Grid/>
-                        </BarChart>
-                        <Text>City 1 data: {JSON.stringify(this.state.muniDataBase['index_socioeconomic_2013_rating_from_1_to_255_1_lowest_most'])}</Text>
-                        <Text>City 2 data: {JSON.stringify(this.state.muniDataCompare['index_socioeconomic_2013_rating_from_1_to_255_1_lowest_most'])}</Text>
+                        <PieChart
+                            style={ { height: 200 } }
+                            data={ pieData2 }
+                        />
+                        <Text>{(this.state.muniDataBase['name_municipality'])} Socio-Eco Rating: {JSON.stringify(dataSocio[0])}</Text>
+                        <Text>{(this.state.muniDataCompare['name_municipality'])} Socio-Eco Rating: {JSON.stringify(dataSocio[1])}</Text>
                     </View>
                     <View>
-                        <BarChart
-                            style={{ height: 200 }}
-                            data={ dataBudget }
-                            svg={{ fill }}
-                            contentInset={{ top: 30, bottom: 30 }}
-                        >
-                        <Grid/>
-                        </BarChart>
+                        <PieChart
+                            style={ { height: 200 } }
+                            data={ pieData3 }
+                        />
+                        <Text>{(this.state.muniDataBase['name_municipality'])} Budget: {JSON.stringify(dataBudget[0])}</Text>
+                        <Text>{(this.state.muniDataCompare['name_municipality'])} Budget: {JSON.stringify(dataBudget[1])}</Text>
                     </View>
                     
                 </React.Fragment>
+                </ScrollView>
             )
         }
     }
