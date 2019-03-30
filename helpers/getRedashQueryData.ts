@@ -90,8 +90,7 @@ export const getRedashQueryData = async <QParams = { [key in string]: string }>(
     if (!data
         || !data.query_result
         || !data.query_result.data
-        || !data.query_result.data.rows
-        || 0 === data.query_result.data.rows.length) {
+        || !data.query_result.data.rows) {
         const error = `Recieved response in unexpected format ${JSON.stringify(data)}`;
         throw Error(error);
     }

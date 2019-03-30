@@ -1,6 +1,6 @@
 import * as React from "react";
 import { StyleSheet, View, ActivityIndicator, FlatList } from "react-native";
-import { ListItem } from "react-native-elements";
+import { ListItem, Text } from "react-native-elements";
 import { NavigationScreenProps, NavigationScreenConfig, NavigationStackScreenOptions } from "react-navigation";
 import { getRedashQueryData } from "../../helpers/getRedashQueryData";
 import { muniDataKeys, muniKeyToName, muniData } from "../../helpers/muniDetails";
@@ -85,7 +85,7 @@ export class ViewSingleCity extends React.Component<NavigationScreenProps> {
     render() {
         return (
             <View style={styles.container}>
-                {!this.state.comparisonVector ? <ActivityIndicator size="large" color="#0000dd" /> :
+                {!this.state.comparisonVector ? <Text>בחר/י בנתון מלמטה על מנת לצפות בערים עם ערכים הקרובים לנתון זה</Text> :
                     <Comparator
                         muniName={this.props.navigation.getParam("cityName", "")}
                         muniId={this.props.navigation.getParam("cityId", "")}

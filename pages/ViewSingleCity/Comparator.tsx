@@ -7,7 +7,7 @@ import { muniDataKeys, muniKeyToName, muniData } from "../../helpers/muniDetails
 // import { BarChart, Grid } from "react-native-svg-charts";
 import { BarChartChildProps } from "../Demo";
 import { StyleSheet, View, ActivityIndicator, Slider } from "react-native";
-import { NavigationScreenProps } from "react-navigation";
+import { NavigationScreenProps, FlatList } from "react-navigation";
 
 export interface BarChartChildProps<T> {
     x?: (x: number) => number;
@@ -69,12 +69,12 @@ export class Comparator extends React.Component<ComparatorProps, ComparatorState
     })
 
     componentDidUpdate(prevProps: ComparatorProps, prevState: ComparatorState) {
-        if (this.state.loading && (
+        if ((this.state.loading || prevProps.muniColumn !== this.props.muniColumn) && (
             prevProps.baseValue !== this.props.baseValue ||
-            prevState.baseValue !== this.state.baseValue ||
-            prevProps.muniColumn !== this.props.muniColumn)) {
+            prevState.baseValue !== this.state.baseValue)) {
             this.fetchData();
-            if (prevProps.baseValue !== this.props.baseValue && this.props.baseValue !== this.state.baseValue) {
+            if (prevProps.baseValue !== this.props.baseValue &&
+                this.props.baseValue !== this.state.baseValue) {
                 this.setState({
                     margin: this.props.margin,
                     baseValue: this.props.baseValue,
@@ -124,7 +124,7 @@ export class Comparator extends React.Component<ComparatorProps, ComparatorState
                             Math.abs(aVal - this.state.baseValue) > Math.abs(bVal - this.state.baseValue) ?
                                 1 : 0
                     );
-                }).slice(0, Math.min(this.state.rowData.length, MAX_COMP_VALS)) :
+                }) :
             [this.generateSelfMuniData()];
 
         return <React.Fragment>
@@ -151,15 +151,19 @@ export class Comparator extends React.Component<ComparatorProps, ComparatorState
                 ? <ActivityIndicator size="large" color="#0000dd" />
                 : <React.Fragment>
                     <View style={styles.comparator}>
-                        {(resData as ComparatorData[])
-                            .sort((a: any, b: any) =>
-                                a[this.props.muniColumn] < b[this.props.muniColumn] ?
-                                    -1 :
-                                    a[this.props.muniColumn] > b[this.props.muniColumn] ?
-                                        1 : 0
-                            )
-                            .map(({ entity_id, name_municipality, [this.props.muniColumn]: otherValue }) =>
-                                (<Button
+                        <FlatList
+                            // style={styles.muniDetails}
+                            horizontal={true}
+                            data={(resData as ComparatorData[])
+                                .sort((a: any, b: any) =>
+                                    a[this.props.muniColumn] < b[this.props.muniColumn] ?
+                                        -1 :
+                                        a[this.props.muniColumn] > b[this.props.muniColumn] ?
+                                            1 : 0
+                                )}
+                            keyExtractor={({ entity_id }) => entity_id}
+                            renderItem={
+                                ({ item: { entity_id, name_municipality, [this.props.muniColumn]: otherValue } }) => (<Button
                                     buttonStyle={{ height: 100 * Math.abs(Number(otherValue) / this.state.baseValue) }}
                                     key={entity_id}
                                     title={name_municipality + (!!otherValue ? ("\n" + otherValue.toString()) : "")}
@@ -168,7 +172,8 @@ export class Comparator extends React.Component<ComparatorProps, ComparatorState
                                         cityId1: this.props.muniId,
                                         cityName2: name_municipality,
                                         cityId2: entity_id
-                                    })} />))}
+                                    })} />)
+                            } />
                     </View>
                 </React.Fragment>
             }
