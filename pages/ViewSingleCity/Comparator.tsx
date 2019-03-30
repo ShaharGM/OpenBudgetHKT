@@ -168,7 +168,7 @@ export class Comparator extends React.Component<ComparatorProps, ComparatorState
                                 (<Button
                                     buttonStyle={{ height: 100 * Math.abs(Number(otherValue) / this.state.baseValue) }}
                                     key={entity_id}
-                                    title={name_municipality}
+                                    title={name_municipality + (!!otherValue ? ("\n" + otherValue.toString()) : "")}
                                     onPress={() => this.props.navigation.navigate("Compare", {
                                         cityName1: this.props.muniName,
                                         cityId1: this.props.muniId,
@@ -187,13 +187,19 @@ export class Comparator extends React.Component<ComparatorProps, ComparatorState
                             <Labels key={this.props.muniColumn} />
                         </BarChart> */}
                     </View>
-                    <Slider
-                        style={{ width: "100%", height: 2 }}
-                        minimumValue={Math.abs(this.props.baseValue * 2) * -1}
-                        maximumValue={Math.abs(2 * this.props.baseValue)}
-                        value={this.state.baseValue}
-                        onValueChange={baseValue => this.setState({ baseValue })}
-                    />
+                    <View style={{
+                        marginLeft: 10,
+                        marginRight: 10,
+                        alignItems: "stretch",
+                        justifyContent: "center",
+                    }}>
+                        <Slider
+                            minimumValue={Math.abs(this.props.baseValue * 2) * -1}
+                            maximumValue={Math.abs(2 * this.props.baseValue)}
+                            value={this.state.baseValue}
+                            onValueChange={baseValue => this.setState({ baseValue })}
+                        />
+                    </View>
                 </React.Fragment>
             }
         </React.Fragment>;
