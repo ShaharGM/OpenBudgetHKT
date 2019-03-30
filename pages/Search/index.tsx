@@ -14,7 +14,7 @@ interface SearchState {
 }
 export class Search extends React.Component<NavigationScreenProps, SearchState> {
     static navigationOptions = {
-        title: "Search cities",
+        title: "בחירת רשות",
     };
     state: SearchState = {
         searchString: "",
@@ -45,7 +45,8 @@ export class Search extends React.Component<NavigationScreenProps, SearchState> 
     renderHeader = () => {
         return (
             <SearchBar
-                placeholder="Type Here..."
+                inputStyle={{ textAlign: "center" }}
+                placeholder="הקלד כאן..."
                 lightTheme
                 round
                 onChangeText={(searchString) => this.setState({ searchString })}
@@ -71,6 +72,8 @@ export class Search extends React.Component<NavigationScreenProps, SearchState> 
                                     cityName: item.name_municipality,
                                     cityId: item.entity_id
                                 })}
+                            rightIcon={{ name: "chevron-left" }}
+                            titleStyle={{ textAlign: "left" }}
                         />
                     }
                     ListHeaderComponent={this.renderHeader}

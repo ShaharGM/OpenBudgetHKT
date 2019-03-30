@@ -1,35 +1,23 @@
 import * as React from "react";
 import { Text, View, ActivityIndicator } from "react-native";
+import { Overlay, Button, ListItem } from "react-native-elements";
 import { NavigationScreenProps, NavigationScreenConfig, NavigationStackScreenOptions } from "react-navigation";
 import { getRedashQueryData } from "../../helpers/getRedashQueryData";
+import { muniDataKeys, muniKeyToName } from "../../helpers/muniDetails";
+import { FlatList } from 'react-native-gesture-handler';
 
+type comparisonVector = "socialScore" | "populationSize";
 export interface ViewSingleCityNavParams {
     cityId: string;
     cityName: string;
 }
 
-type muniDataKeys = | "name_municipality"
-    | "index_socioeconomic_2013_rating_from_1_to_255_1_lowest_most"
-    | "avg_students_per_class_total_2015_2014/15"
-    | "balance_immigration_total_2015"
-    | "cars_private_total_2015"
-    | "births_live_2015"
-    | "deaths_2015"
-    | "income_avg_monthly_of_freelancers_in_2014_nis"
-    | "index_inequality_employees_index_gini_0_equality_full_in_2014"
-    | "jews_pct_2015"
-    | "arab_pct_2015"
-    | "muslim_pct_2015"
-    | "druse_pct_2015"
-    | "christian_pct_2015"
-    | "total_population_end_2015_1000s"
-    | "uses_land_number_all_area_jurisdiction_km2"
-    | "total_expenses_of_municipality_budget_regular_1000s_nis_2015";
 export interface ViewSingleCityState {
     muniData?: {
         [key in muniDataKeys]: string
     };
     loading: boolean;
+    comparisonVector?: comparisonVector;
 }
 export class ViewSingleCity extends React.Component<NavigationScreenProps> {
     static navigationOptions: NavigationScreenConfig<NavigationStackScreenOptions> = ({ navigation }) => {
@@ -39,8 +27,9 @@ export class ViewSingleCity extends React.Component<NavigationScreenProps> {
     }
 
     state = {
-        muniData: undefined,
-        loading: true
+        muniData: {},
+        loading: true,
+        comparisonVector: undefined
     };
 
     componentWillMount() {
@@ -78,9 +67,34 @@ export class ViewSingleCity extends React.Component<NavigationScreenProps> {
     render() {
         return (
             <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+                <Overlay
+                    isVisible={!this.state.comparisonVector}
+                    windowBackgroundColor="rgba(255, 255, 255, .8)"
+                    // overlayBackgroundColor="red"
+                    width="auto"
+                    height="auto"
+                >
+                    <View>
+                        <Button title="השוואה לפי מדד סוציואקונומי"
+                            onPress={() => this.setState({ comparisonVector: "socialScore" })} />
+                        <Button title="השוואה לפי גודל אוכלוסיה"
+                            onPress={() => this.setState({ comparisonVector: "populationSize" })} />
+                    </View>
+                </Overlay>
                 {this.state.loading ?
                     <ActivityIndicator size="large" color="#0000dd" /> :
-                    <Text>City data: {JSON.stringify(this.state.muniData)}</Text>}
+                    <FlatList
+                        style={{ width: "100%" }}
+                        data={Object.keys(this.state.muniData).sort()}
+                        keyExtractor={(key) => key}
+                        renderItem={
+                            ({ item: muniKey }) => (<ListItem
+                                title={muniKeyToName[muniKey]}
+                                titleStyle={{ textAlign: "left" }}
+                                badge={{ value: this.state.muniData[muniKey], left: 0 }}
+                            />)
+                        } />
+                }
             </View>
         );
     }
