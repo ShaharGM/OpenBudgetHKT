@@ -37,7 +37,9 @@ export const getRedashQueryData = async <QParams = { [key in string]: string }>(
 
     const jobResponseBody = await jobResponse.json();
 
-    if (!jobResponseBody
+    if (jobResponseBody && jobResponseBody.query_result) {
+        return jobResponseBody.query_result;
+    } else if (!jobResponseBody
         || !jobResponseBody.job
         || "" !== jobResponseBody.job.error
         || !jobResponseBody.job.id) {
