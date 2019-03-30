@@ -2,6 +2,7 @@ import * as React from "react";
 import { View, Button, FlatList, ActivityIndicator } from "react-native";
 import { NavigationScreenProps } from "react-navigation";
 import { ListItem, SearchBar } from "react-native-elements";
+import { getRedashQueryData } from '../../helpers/getRedashQueryData';
 
 interface MuniTableRow {
     entity_id: string;
@@ -27,19 +28,24 @@ export class Search extends React.Component<NavigationScreenProps, SearchState> 
     }
 
     fetchData = async () => {
-        const response = await fetch(
-            "https://app.redash.io/hasadna/api/queries/185508/results.json?api_key=FVLJzO1Au4ZM1yhr0J0jDKCg97wE0i12T9UGK9GY"
-        );
-        const data = await response.json();
-        this.setState({
-            loading: false,
-            muniList:
-                data && data.query_result && data.query_result.data && data.query_result.data.rows
-                    ? (data.query_result.data.rows as MuniTableRow[]).sort((a, b) =>
-                        a.name_municipality < b.name_municipality ? -1 :
-                            a.name_municipality > b.name_municipality ? 1 :
-                                0) : []
-        });
+        try {
+            const { data }: { data: { rows: MuniTableRow[] } } = await getRedashQueryData({
+                redashURL: "https://app.redash.io/hasadna",
+                userApiKey: "V7BqVSVSWEfr7ZIJUMNgrD5cUXBt8u1TC57aVDdW",
+                queryId: 185508
+            });
+            return this.setState({
+                loading: false,
+                muniList:
+                    data && data.rows
+                        ? (data.rows as MuniTableRow[]).sort((a, b) =>
+                            a.name_municipality < b.name_municipality ? -1 :
+                                a.name_municipality > b.name_municipality ? 1 :
+                                    0) : []
+            });
+        } catch (error) {
+            return console.warn((error as Error).message);
+        }
     }
 
     renderHeader = () => {

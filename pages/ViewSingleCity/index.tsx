@@ -1,24 +1,39 @@
 import * as React from "react";
-import { Text, View, ActivityIndicator } from "react-native";
-import { Overlay, Button, ListItem } from "react-native-elements";
+import { StyleSheet, View, ActivityIndicator, FlatList } from "react-native";
+import { ListItem } from "react-native-elements";
 import { NavigationScreenProps, NavigationScreenConfig, NavigationStackScreenOptions } from "react-navigation";
 import { getRedashQueryData } from "../../helpers/getRedashQueryData";
-import { muniDataKeys, muniKeyToName } from "../../helpers/muniDetails";
-import { FlatList } from 'react-native-gesture-handler';
+import { muniDataKeys, muniKeyToName, muniData } from "../../helpers/muniDetails";
+import { Comparator } from "./Comparator";
 
-type comparisonVector = "socialScore" | "populationSize";
 export interface ViewSingleCityNavParams {
     cityId: string;
     cityName: string;
 }
 
 export interface ViewSingleCityState {
-    muniData?: {
-        [key in muniDataKeys]: string
-    };
+    muniData?: muniData;
     loading: boolean;
-    comparisonVector?: comparisonVector;
+    comparisonVector?: muniDataKeys;
+    baseSearchValue: number;
 }
+
+const styles = StyleSheet.create({
+    container: {
+        backgroundColor: "#ecf0f1",
+        padding: 8,
+        height: "100%",
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center"
+    },
+    muniDetails: {
+        flex: 1,
+        height: "50%",
+        width: "100%"
+    }
+});
+
 export class ViewSingleCity extends React.Component<NavigationScreenProps> {
     static navigationOptions: NavigationScreenConfig<NavigationStackScreenOptions> = ({ navigation }) => {
         return {
@@ -29,7 +44,8 @@ export class ViewSingleCity extends React.Component<NavigationScreenProps> {
     state = {
         muniData: {},
         loading: true,
-        comparisonVector: undefined
+        comparisonVector: undefined,
+        baseSearchValue: 0
     };
 
     componentWillMount() {
@@ -40,7 +56,8 @@ export class ViewSingleCity extends React.Component<NavigationScreenProps> {
         const userCityID = this.props.navigation.getParam("cityId", "");
         if (!userCityID) {
             const error = "Tried to view single city with no cityId";
-            return this.props.navigation.navigate("Search", { error });
+            console.warn(error);
+            return this.props.navigation.navigate("Search");
         }
 
         try {
@@ -52,7 +69,8 @@ export class ViewSingleCity extends React.Component<NavigationScreenProps> {
             });
             if (1 !== data.rows.length) {
                 const error = `Got more than one respone (${data.rows.length}) to id query`;
-                return this.props.navigation.navigate("Search", { error });
+                console.warn(error);
+                return this.props.navigation.navigate("Search");
             }
             return this.setState({
                 loading: false,
@@ -66,11 +84,10 @@ export class ViewSingleCity extends React.Component<NavigationScreenProps> {
 
     render() {
         return (
-            <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-                <Overlay
+            <View style={styles.container}>
+                {/* <Overlay
                     isVisible={!this.state.comparisonVector}
                     windowBackgroundColor="rgba(255, 255, 255, .8)"
-                    // overlayBackgroundColor="red"
                     width="auto"
                     height="auto"
                 >
@@ -80,18 +97,29 @@ export class ViewSingleCity extends React.Component<NavigationScreenProps> {
                         <Button title="השוואה לפי גודל אוכלוסיה"
                             onPress={() => this.setState({ comparisonVector: "populationSize" })} />
                     </View>
-                </Overlay>
+                </Overlay> */}
+                {!this.state.comparisonVector ? <ActivityIndicator size="large" color="#0000dd" /> :
+                    <Comparator
+                        muniName={this.props.navigation.getParam("cityName", "")}
+                        muniId={this.props.navigation.getParam("cityId", "")}
+                        baseValue={this.state.baseSearchValue}
+                        margin={5}
+                        muniColumn={this.state.comparisonVector as unknown as muniDataKeys}
+                        navigation={this.props.navigation}
+                    />
+                }
                 {this.state.loading ?
                     <ActivityIndicator size="large" color="#0000dd" /> :
                     <FlatList
-                        style={{ width: "100%" }}
-                        data={Object.keys(this.state.muniData).sort()}
+                        style={styles.muniDetails}
+                        data={Object.keys(this.state.muniData).filter((key) => typeof this.state.muniData[key] === "number").sort()}
                         keyExtractor={(key) => key}
                         renderItem={
                             ({ item: muniKey }) => (<ListItem
                                 title={muniKeyToName[muniKey]}
                                 titleStyle={{ textAlign: "left" }}
                                 badge={{ value: this.state.muniData[muniKey], left: 0 }}
+                                onPress={() => this.setState({ comparisonVector: muniKey, baseSearchValue: this.state.muniData[muniKey] })}
                             />)
                         } />
                 }

@@ -4,7 +4,7 @@ const DEFAULT_MAX_AGE = 9999;
 export interface GetRedashQueryDataProps<QParams = { [key in string]: string }> {
     redashURL: string;  // e.g. https://app.redash.io/hasadna
     queryId: number;  // e.g. 185581
-    queryParams: QParams;  // e.g. {"userCityID": 123121}
+    queryParams?: QParams;  // e.g. {"userCityID": 123121}
     /* If query results less than `max_age` seconds old are available,
      * return them, otherwise execute the query; if omitted or - 1, returns
      * any cached result, or executes if not available.Set to zero to
