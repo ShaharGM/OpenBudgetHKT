@@ -1,12 +1,12 @@
 
 import * as React from "react";
-import { Text, Slider, Button } from "react-native-elements";
+import { Text, Button } from "react-native-elements";
 import { getRedashQueryData } from "../../helpers/getRedashQueryData";
 import { muniDataKeys, muniKeyToName, muniData } from "../../helpers/muniDetails";
 // import { Svg } from "expo";
 // import { BarChart, Grid } from "react-native-svg-charts";
 import { BarChartChildProps } from "../Demo";
-import { StyleSheet, View, ActivityIndicator } from "react-native";
+import { StyleSheet, View, ActivityIndicator, Slider } from "react-native";
 import { NavigationScreenProps } from "react-navigation";
 
 export interface BarChartChildProps<T> {
@@ -48,42 +48,9 @@ const styles = StyleSheet.create({
     }
 });
 
-// interface ComparatorLabelProps extends BarChartChildProps<ComparatorData> {
-//     key: muniDataKeys;
-// }
-
 const MAX_COMP_VALS = 5;
 
-// const CUT_OFF = 20;
-// const Labels = ({ x, y, bandwidth, data, key }: ComparatorLabelProps) => (
-//     (!x || !y || !bandwidth || !data) ?
-//         null :
-//         <React.Fragment>
-//             {
-//                 data.map(({ [key]: num, name_municipality }, index) => (
-//                     <Svg.Text
-//                         key={index}
-//                         x={x(index) + (bandwidth / 2)}
-//                         y={Number(num) ? y(Number(num)) - 10 : 0}  // (Number(num) < CUT_OFF ? y(Number(num)) - 10 : y(Number(num)) + 15)
-//                         fontSize={14}
-//                         fill={Number(num) >= CUT_OFF ? "white" : "black"}
-//                         textAnchor={"middle"}
-//                     >
-//                         {name_municipality}: {num}
-//                     </Svg.Text>
-//                 ))
-//             }</React.Fragment>
-// );
-
 export class Comparator extends React.Component<ComparatorProps, ComparatorState> {
-    static getDerivedStateFromProps({ margin, baseValue }: ComparatorProps, state: ComparatorState) {
-        return {
-            ...state,
-            margin,
-            baseValue,
-        };
-    }
-
     constructor(props: ComparatorProps) {
         super(props);
         const { margin, baseValue } = props;
@@ -101,8 +68,19 @@ export class Comparator extends React.Component<ComparatorProps, ComparatorState
         [this.props.muniColumn]: this.props.baseValue
     })
 
-    componentDidUpdate() {
-        this.fetchData();
+    componentDidUpdate(prevProps: ComparatorProps, prevState: ComparatorState) {
+        if (this.state.loading && (
+            prevProps.baseValue !== this.props.baseValue ||
+            prevState.baseValue !== this.state.baseValue ||
+            prevProps.muniColumn !== this.props.muniColumn)) {
+            this.fetchData();
+            if (prevProps.baseValue !== this.props.baseValue && this.props.baseValue !== this.state.baseValue) {
+                this.setState({
+                    margin: this.props.margin,
+                    baseValue: this.props.baseValue,
+                });
+            }
+        }
     }
 
     componentDidMount() {
@@ -153,6 +131,22 @@ export class Comparator extends React.Component<ComparatorProps, ComparatorState
             <Text h3={true} style={{ width: "100%", textAlign: "center" }}>
                 השוואה לפי {muniKeyToName[this.props.muniColumn as unknown as string]}
             </Text>
+            <View style={{
+                marginLeft: 10,
+                marginRight: 10,
+                alignItems: "stretch",
+                justifyContent: "center",
+            }}>
+                <Slider
+                    style={{ width: 300 }}
+                    step={1}
+                    minimumValue={Math.abs(this.props.baseValue * 2) * -1}
+                    maximumValue={Math.abs(2 * this.props.baseValue)}
+                    value={this.state.baseValue}
+                    onSlidingComplete={baseValue => this.setState({ baseValue, loading: true })}
+                />
+                <Text>ערך נוכחי: {this.state.baseValue}</Text>
+            </View>
             {this.state.loading
                 ? <ActivityIndicator size="large" color="#0000dd" />
                 : <React.Fragment>
@@ -175,30 +169,6 @@ export class Comparator extends React.Component<ComparatorProps, ComparatorState
                                         cityName2: name_municipality,
                                         cityId2: entity_id
                                     })} />))}
-                        {/* <BarChart<ComparatorData>
-                            style={{ flex: 1 }}
-                            data={resData}
-                            yAccessor={({ item }) => Number(item[this.props.muniColumn])}
-                            svg={{ fill: "rgba(134, 65, 244, 0.8)", onPress: (props) => console.warn(JSON.stringify(Object.keys(props))) }}
-                            contentInset={{ top: 10, bottom: 10 }}
-                            gridMin={0}
-                        >
-                            <Grid direction={Grid.Direction.HORIZONTAL} />
-                            <Labels key={this.props.muniColumn} />
-                        </BarChart> */}
-                    </View>
-                    <View style={{
-                        marginLeft: 10,
-                        marginRight: 10,
-                        alignItems: "stretch",
-                        justifyContent: "center",
-                    }}>
-                        <Slider
-                            minimumValue={Math.abs(this.props.baseValue * 2) * -1}
-                            maximumValue={Math.abs(2 * this.props.baseValue)}
-                            value={this.state.baseValue}
-                            onValueChange={baseValue => this.setState({ baseValue })}
-                        />
                     </View>
                 </React.Fragment>
             }
