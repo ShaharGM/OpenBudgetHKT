@@ -83,6 +83,15 @@ export class Search extends React.Component<NavigationScreenProps, SearchState> 
                     title="Go to Demo for graphical capabilities"
                     onPress={() => this.props.navigation.navigate("Demo")}
                 />
+                <Button
+                    title="Go to Compare for graphical capabilities"
+                    onPress={() => this.props.navigation.navigate("Compare", {
+                        cityName1: 'תל אביב',
+                        cityId1: '500250006',
+                        cityName2: 'חיפה',
+                        cityId2: '500240007'
+                    })}
+                />
             </View>
         );
     }

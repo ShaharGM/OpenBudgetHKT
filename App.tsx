@@ -1,11 +1,13 @@
 import * as React from "react";
 import { createStackNavigator, createAppContainer } from "react-navigation";
 import { Demo } from "./pages/Demo";
+import { Compare } from "./pages/Compare";
 import { Search } from "./pages/Search";
 import { ViewSingleCity } from "./pages/ViewSingleCity";
 
 const AppNavigator = createStackNavigator({
   Demo,
+  Compare,
   ViewSingleCity,
   Search
 },
