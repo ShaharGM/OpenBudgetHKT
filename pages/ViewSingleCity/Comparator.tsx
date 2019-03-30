@@ -4,10 +4,10 @@ import { Text, Slider, Button } from "react-native-elements";
 import { getRedashQueryData } from "../../helpers/getRedashQueryData";
 import { muniDataKeys, muniKeyToName, muniData } from "../../helpers/muniDetails";
 import { Svg } from "expo";
-import { BarChart, Grid } from "react-native-svg-charts";
+// import { BarChart, Grid } from "react-native-svg-charts";
 import { BarChartChildProps } from "../Demo";
 import { StyleSheet, View, ActivityIndicator } from "react-native";
-import { NavigationScreenProps } from 'react-navigation';
+import { NavigationScreenProps } from "react-navigation";
 
 export interface BarChartChildProps<T> {
     x?: (x: number) => number;
@@ -48,32 +48,32 @@ const styles = StyleSheet.create({
     }
 });
 
-interface ComparatorLabelProps extends BarChartChildProps<ComparatorData> {
-    key: muniDataKeys;
-}
+// interface ComparatorLabelProps extends BarChartChildProps<ComparatorData> {
+//     key: muniDataKeys;
+// }
 
 const MAX_COMP_VALS = 5;
 
-const CUT_OFF = 20;
-const Labels = ({ x, y, bandwidth, data, key }: ComparatorLabelProps) => (
-    (!x || !y || !bandwidth || !data) ?
-        null :
-        <React.Fragment>
-            {
-                data.map(({ [key]: num, name_municipality }, index) => (
-                    <Svg.Text
-                        key={index}
-                        x={x(index) + (bandwidth / 2)}
-                        y={Number(num) ? y(Number(num)) - 10 : 0}  // (Number(num) < CUT_OFF ? y(Number(num)) - 10 : y(Number(num)) + 15)
-                        fontSize={14}
-                        fill={Number(num) >= CUT_OFF ? "white" : "black"}
-                        textAnchor={"middle"}
-                    >
-                        {name_municipality}: {num}
-                    </Svg.Text>
-                ))
-            }</React.Fragment>
-);
+// const CUT_OFF = 20;
+// const Labels = ({ x, y, bandwidth, data, key }: ComparatorLabelProps) => (
+//     (!x || !y || !bandwidth || !data) ?
+//         null :
+//         <React.Fragment>
+//             {
+//                 data.map(({ [key]: num, name_municipality }, index) => (
+//                     <Svg.Text
+//                         key={index}
+//                         x={x(index) + (bandwidth / 2)}
+//                         y={Number(num) ? y(Number(num)) - 10 : 0}  // (Number(num) < CUT_OFF ? y(Number(num)) - 10 : y(Number(num)) + 15)
+//                         fontSize={14}
+//                         fill={Number(num) >= CUT_OFF ? "white" : "black"}
+//                         textAnchor={"middle"}
+//                     >
+//                         {name_municipality}: {num}
+//                     </Svg.Text>
+//                 ))
+//             }</React.Fragment>
+// );
 
 export class Comparator extends React.Component<ComparatorProps, ComparatorState> {
     static getDerivedStateFromProps({ margin, baseValue }: ComparatorProps, state: ComparatorState) {
@@ -142,9 +142,9 @@ export class Comparator extends React.Component<ComparatorProps, ComparatorState
                     const bVal = b[this.props.muniColumn] as unknown as number;
                     return (
                         Math.abs(aVal - this.state.baseValue) < Math.abs(bVal - this.state.baseValue) ?
-                            1 :
+                            -1 :
                             Math.abs(aVal - this.state.baseValue) > Math.abs(bVal - this.state.baseValue) ?
-                                -1 : 0
+                                1 : 0
                     );
                 }).slice(0, Math.min(this.state.rowData.length, MAX_COMP_VALS)) :
             [this.generateSelfMuniData()];
@@ -157,16 +157,23 @@ export class Comparator extends React.Component<ComparatorProps, ComparatorState
                 ? <ActivityIndicator size="large" color="#0000dd" />
                 : <React.Fragment>
                     <View style={styles.comparator}>
-                        {resData.map(({ entity_id, name_municipality }) =>
-                            (<Button
-                                key={entity_id}
-                                title={name_municipality}
-                                onPress={() => this.props.navigation.navigate("Compare", {
-                                    cityName1: this.props.muniName,
-                                    cityId1: this.props.muniId,
-                                    cityName2: name_municipality,
-                                    cityId2: entity_id
-                                })} />))}
+                        {resData
+                            .sort((a, b) =>
+                                a[this.props.muniColumn] < b[this.props.muniColumn] ?
+                                    -1 :
+                                    a[this.props.muniColumn] > b[this.props.muniColumn] ?
+                                        1 : 0
+                            )
+                            .map(({ entity_id, name_municipality }) =>
+                                (<Button
+                                    key={entity_id}
+                                    title={name_municipality}
+                                    onPress={() => this.props.navigation.navigate("Compare", {
+                                        cityName1: this.props.muniName,
+                                        cityId1: this.props.muniId,
+                                        cityName2: name_municipality,
+                                        cityId2: entity_id
+                                    })} />))}
                         {/* <BarChart<ComparatorData>
                             style={{ flex: 1 }}
                             data={resData}
